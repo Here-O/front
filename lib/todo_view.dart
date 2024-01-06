@@ -8,6 +8,7 @@ import 'mypoints.dart';
 import 'todolist.dart';
 import 'globals.dart';
 import 'todo.dart';
+import 'new_todo.dart';
 
 class TodoListTab extends StatefulWidget {
   @override
@@ -167,7 +168,7 @@ class _TodoListTabState extends State<TodoListTab> {
 
       child: ElevatedButton.icon(
         onPressed: () {
-
+          Navigator.push(context, MaterialPageRoute(builder: (context) => TodoResponsePage()));
         },
         icon: Icon(Icons.add),
         label: Text('Add Todo'),
@@ -187,6 +188,11 @@ class _TodoListTabState extends State<TodoListTab> {
           return ListTile(
             title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
             trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
+            tileColor: my_todoList_c[index].done
+                ? Colors.blue // todoo.done이 true면 파란색
+                : my_todoList_c[index].routine
+                ? Colors.yellow // todoo.routine이 true면 노란색
+                : null,
           );
         },
       )

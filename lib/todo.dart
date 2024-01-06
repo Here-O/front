@@ -35,7 +35,6 @@ class todo {
       user: json['user'] as String,
       id: json['_id'] as String,
       doneAt: json['doneAt'] != null ? DateTime.parse(json['doneAt']) : null,
-
     );
   }
 
