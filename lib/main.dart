@@ -1,13 +1,26 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'login_page.dart';
 import 'package:http/http.dart' as http;
 
 
 
 
-void main() {
+void main() async{
+  await _initialize();
   runApp(MyApp());
 }
+
+Future<void> _initialize() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NaverMapSdk.instance.initialize(
+    clientId: 'okzqmxz8pr',
+    onAuthFailed: (e) => log("navermap failed: $e", name: "onAuthFailed")
+  );
+}
+
 
 class MyApp extends StatelessWidget {
   @override

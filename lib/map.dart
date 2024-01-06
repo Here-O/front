@@ -1,6 +1,7 @@
 import 'dart:developer';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'login_page.dart';
@@ -16,6 +17,9 @@ class map extends StatefulWidget {
 class _map extends State<map> {
   int _selectedIndex = 0;
 
+  void main() async {
+
+  }
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -26,6 +30,7 @@ class _map extends State<map> {
   Widget build(BuildContext context) {
     var user = User.current;
     var username = user.name;
+    final Completer<NaverMapController> mapControllerCompleter = Completer();
 
     return Scaffold(
       body: Padding(
@@ -37,10 +42,24 @@ class _map extends State<map> {
               username,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24.0,
+                fontSize: 18.0,
                 color: Colors.black,
               ),
             ),
+            Expanded(
+              child: NaverMap(
+              options: const NaverMapViewOptions(
+                indoorEnable: false,
+                locationButtonEnable: true,
+                consumeSymbolTapEvents: false,
+              ),
+              onMapReady: (controller) async {
+                //_mapController = controller;
+                mapControllerCompleter.complete(controller);
+                log("onMapReady", name:"onMapReady");
+              },
+            ),)
+
           ],
         ),
       ),
@@ -67,4 +86,6 @@ class _map extends State<map> {
       ),
     );
   }
+
+
 }
