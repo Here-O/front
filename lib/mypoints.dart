@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'todo.dart';
 import 'user.dart';
 import 'todolist.dart';
+import 'globals.dart';
+import 'map.dart';
+import "todo_view.dart";
 
 class MyPointsPage extends StatefulWidget {
   @override
@@ -15,6 +18,7 @@ class MyPointsPage extends StatefulWidget {
 
 class _MyPointsPage extends  State<MyPointsPage> {
   TodoList todoList = TodoList();
+  int _selectedIndex = 2;
 
   @override
   void initState() {
@@ -25,16 +29,19 @@ class _MyPointsPage extends  State<MyPointsPage> {
   Future<void> updateUser() async {
     try {
       var response = await http.get(
-        Uri.parse('http://143.248.193.22:3000/mypage'),
+        Uri.parse('${basicUrl}/mypage'),
         headers: <String, String>{
           'Authorization': "Bearer ${User.current.token}"
         },
       );
-
+      log('${response.body}');
       if (response.statusCode == 200) {
+
         final responseJson = json.decode(response.body);
+        final responseUser = responseJson["loginUser"][0];
         var token = User.current.token;
-        User.update(responseJson["_id"], responseJson["userEmail"], responseJson["userName"], token, responseJson["point"]);
+        log("${responseUser["point"]}");
+        User.update(responseUser["_id"], responseUser["userEmail"], responseUser["userName"], token, responseUser["point"]);
       }
       setState(() {
         // UI 업데이트를 위해 setState 호출
@@ -50,7 +57,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
 
     try {
       var response = await http.get(
-        Uri.parse('http://143.248.193.22:3000/todo'), // 서버의 실제 URL로 변경
+        Uri.parse('${basicUrl}/todo'), // 서버의 실제 URL로 변경
         headers: <String, String>{
           'Authorization': "Bearer ${User.current.token}"
         },
@@ -96,33 +103,55 @@ class _MyPointsPage extends  State<MyPointsPage> {
     var my_todo = todoList.getTodosByUser(User.current.id);
     //log(my_todo as String);
 
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
     return Scaffold(
 
       appBar: AppBar(
         title: Text('My points'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 사용자의 포인트와 이름을 표시하는 섹션
-            _buildPointsSection(),
-            // 친구들의 원형 아이콘 리스트
-            _buildFriendsScrollList(),
-            // 필터 버튼
-            _buildFilterButtons(),
-            // 투두리스트 달성 현황
-            _buildTodoListStatus(my_todo),
-          ],
-        ),
+      body: Column(
+        children: [
+          // 사용자의 포인트와 이름을 표시하는 섹션
+          _buildPointsSection(),
+          // 친구들의 원형 아이콘 리스트
+          _buildFriendsScrollList(),
+          // 필터 버튼
+
+          // 투두리스트 달성 현황
+          SingleChildScrollView(
+              child:Column(
+                children: [
+                  _buildFilterButtons(),
+                  _buildTodoListStatus(my_todo),
+                ],
+              )
+          ),
+        ],
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Todolist'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'My points'),
         ],
+        currentIndex: _selectedIndex, // 현재 선택된 탭 인덱스
+        selectedItemColor: Colors.purple, // 선택된 아이템의 색상
         onTap: (index) {
-          // 탭 했을 때의 동작 구현
+          if (index == 0) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => map()));
+            _onItemTapped(index);
+          } else if (index == 1) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));
+            _onItemTapped(index);
+          } else {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
+            _onItemTapped(index);
+          }
         },
       ),
     );

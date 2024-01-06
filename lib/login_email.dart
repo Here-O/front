@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'login_page.dart';
+import 'globals.dart';
 
 class login_email extends StatefulWidget {
   @override
@@ -26,7 +27,7 @@ class _LoginPageState extends State<login_email> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://143.248.193.22:3000/signUp'),
+        Uri.parse('${basicUrl}/signUp'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },

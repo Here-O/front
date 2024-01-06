@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'globals.dart';
 import 'login_email.dart';
 import 'user.dart';
 import 'map.dart';
@@ -42,7 +43,7 @@ class _LoginPage extends State<LoginPage> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://143.248.193.22:3000/login'), // 서버의 실제 URL로 변경
+        Uri.parse('${basicUrl}/login'), // 서버의 실제 URL로 변경
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
