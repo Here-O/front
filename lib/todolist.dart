@@ -6,15 +6,12 @@ class TodoList {
 
   // Todo 객체를 TodoList에 추가하는 메소드
   void addTodo(todo todo) {
-    if (userTodos[todo.user] == null) {
-      userTodos[todo.user] = [];
-    }
-    userTodos[todo.user]!.add(todo);
+    userTodos.putIfAbsent(todo.user, () => []).add(todo);
   }
 
   // 특정 유저의 Todo 리스트를 반환하는 메소드
-  List<todo>? getTodosByUser(String userId) {
-    return userTodos[userId];
+  List<todo> getTodosByUser(String userId) {
+    return userTodos[userId] ?? [];
   }
 
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -19,9 +21,7 @@ class _TodoListTabState extends State<TodoListTab> {
   late String formattedSelectedDate;
 
   // Dummy list of to-dos for today.
-  List<todo>? my_todoList_c = my_todoList;
-
-
+  List<todo> my_todoList_c = my_todoList;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -31,8 +31,13 @@ class _TodoListTabState extends State<TodoListTab> {
 
   void filterTodosBySelectedDate() {
     // formattedSelectedDate에 해당하는 todo 객체들만 필터링
+    my_todoList_c = my_todoList;
 
-    List<todo>? filteredTodos = my_todoList_c?.where((todo) {
+    log(selectedDate.day.toString());
+    formattedSelectedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+    log(formattedSelectedDate.toString());
+
+    List<todo> filteredTodos = my_todoList_c.where((todo) {
       return todo.date == formattedSelectedDate; // 날짜 비교
     }).toList();
 
@@ -45,7 +50,6 @@ class _TodoListTabState extends State<TodoListTab> {
   @override
   void initState() {
     super.initState();
-    formattedSelectedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
     filterTodosBySelectedDate();
   }
 
@@ -56,14 +60,20 @@ class _TodoListTabState extends State<TodoListTab> {
         title: Text('Todo List'),
       ),
       body: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           SizedBox(height: 20),
-          _buildDateScroll(),
+          SingleChildScrollView(
+            //height: 100, // _buildDateScroll에 고정된 높이를 줍니다.
+            child: _buildDateScroll(),
+          ),
+
           _buildFirstTodo(),
           _buildAddTodoButton(),
           _buildTodoList(),
         ],
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
@@ -90,24 +100,36 @@ class _TodoListTabState extends State<TodoListTab> {
 
   Widget _buildDateScroll() {
     return Container(
-      height: 60,
+      height: 80,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 9, // Current day + 4 days before and after
         itemBuilder: (context, index) {
           DateTime date = selectedDate.subtract(Duration(days: 4 - index));
-          bool isTodayOrBefore = date.isBefore(DateTime.now().add(Duration(days: 1)));
+          bool isTodayOrBefore = date.isBefore(DateTime.now().add(Duration(days: 0)));
           bool isToday = date.day == DateTime.now().day;
+          String day = DateFormat('EEEE').format(date);
 
-          return Container(
-            width: 50,
-            child: Column(
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundColor: isToday ? Colors.green : (isTodayOrBefore ? Colors.blue : Colors.grey),
-                  child: Text('${date.day}'),
-                ),
-              ],
+          return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
+            onTap: () {
+              setState(() {
+                selectedDate = date;
+                log(selectedDate.day.toString());
+                filterTodosBySelectedDate();
+              });
+
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  Text(day),
+                  CircleAvatar(
+                    backgroundColor: isToday ? Colors.green : (isTodayOrBefore ? Colors.blue : Colors.grey),
+                    child: Text('${date.day}'),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -116,6 +138,7 @@ class _TodoListTabState extends State<TodoListTab> {
   }
 
   Widget _buildFirstTodo() {
+    if (my_todoList_c.isNotEmpty) {
     return Container(
       color: Colors.grey[300],
       padding: EdgeInsets.all(16),
@@ -124,6 +147,16 @@ class _TodoListTabState extends State<TodoListTab> {
         child: Text(my_todoList_c?.first.context ?? 'No todos yet'),
       ),
     );
+    } else {
+      return Container(
+        color: Colors.grey[300],
+        padding: EdgeInsets.all(16),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text('No todos yet'),
+        ),
+      );
+    }
   }
 
   Widget _buildAddTodoButton() {
@@ -134,7 +167,7 @@ class _TodoListTabState extends State<TodoListTab> {
 
       child: ElevatedButton.icon(
         onPressed: () {
-          // Add your onPressed logic here
+
         },
         icon: Icon(Icons.add),
         label: Text('Add Todo'),
@@ -148,7 +181,7 @@ class _TodoListTabState extends State<TodoListTab> {
 
   Widget _buildTodoList() {
     return Expanded(
-      child: ListView.builder(
+      child: my_todoList_c.isNotEmpty? ListView.builder(
         itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
           return ListTile(
@@ -156,7 +189,8 @@ class _TodoListTabState extends State<TodoListTab> {
             trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
           );
         },
-      ),
+      )
+      : Center(child : Text("No items in this day")),
     );
   }
 }
