@@ -1,10 +1,12 @@
+
 class User {
   String id;
   String email;
   String name;
   String token; // 인증 토큰 등 추가적인 정보를 저장할 수 있습니다.
+  int points;
 
-  User({required this.id, required this.email, required this.name, required this.token});
+  User({required this.id, required this.email, required this.name, required this.token, required this.points});
 
   // User 클래스의 싱글턴 인스턴스
   static User? _instance;
@@ -16,6 +18,7 @@ class User {
       email: json['email'] as String,
       name: json['name'] as String,
       token: json['jwt'] as String,
+      points: json['points'] as int,
     );
   }
 
@@ -26,17 +29,26 @@ class User {
   }
 
   // 인스턴스 초기화
-  static void initialize(String id, String email, String name, String token) {
-    _instance = User(id: id, email: email, name: name, token: token);
+  static void initialize(String id, String email, String name, String token, int points) {
+    _instance = User(id: id, email: email, name: name, token: token, points: points);
+  }
+
+  static void return_points(points) {
+    if (points != null) {
+      return points;
+    } else {
+      return;
+    }
   }
 
   // 인스턴스 정보 업데이트
-  static void update({String? id, String? email, String? name, String? token}) {
+  static void update(String id, String email, String name, String token, int points) {
     if (_instance != null) {
       _instance!.id = id ?? _instance!.id;
       _instance!.email = email ?? _instance!.email;
       _instance!.name = name ?? _instance!.name;
       _instance!.token = token ?? _instance!.token;
+      _instance!.points = points ?? _instance!.points;
     }
   }
 

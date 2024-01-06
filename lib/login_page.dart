@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import 'login_email.dart';
 import 'user.dart';
 import 'map.dart';
+import 'mypoints.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -14,6 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
+
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -55,9 +58,11 @@ class _LoginPage extends State<LoginPage> {
         // 로그인 성공 처리
         log('로그인 성공: ${response.body}');
         final jsonResponse = json.decode(response.body);
-        User.initialize(jsonResponse["id"], jsonResponse["email"], jsonResponse["name"], jsonResponse["jwt"]);
-        User user = User.fromJson(jsonResponse);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => map()));
+        User.initialize(jsonResponse["id"], jsonResponse["email"], jsonResponse["name"], jsonResponse["jwt"], 0);
+        //User.fromJson(jsonResponse);
+
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
+
       } else {
         log('로그인 실패: ${response.body}');
         Fluttertoast.showToast(
@@ -78,6 +83,8 @@ class _LoginPage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    User.initialize("id_ex", "name_ex", "email_ex", "jwt_ex", 0);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -124,7 +131,9 @@ class _LoginPage extends State<LoginPage> {
               ),
               SizedBox(height: 12.0),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
+                },
                 child: Text('Forgot password?'),
               ),
               SizedBox(height: 24.0),

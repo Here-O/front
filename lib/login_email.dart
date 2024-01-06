@@ -13,8 +13,9 @@ class login_email extends StatefulWidget {
 class _LoginPageState extends State<login_email> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
 
-  Future<void> signIn() async {
+  Future<void> signUp() async {
     log('signIn 시작');
 
     // 입력 유효성 검사
@@ -30,6 +31,7 @@ class _LoginPageState extends State<login_email> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode(<String, String>{
+          'userName': nameController.text,
           'userEmail': emailController.text,
           'password': passwordController.text,
         }),
@@ -79,6 +81,10 @@ class _LoginPageState extends State<login_email> {
             ),
             SizedBox(height: 48.0),
             TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: '이름'),
+            ),
+            TextField(
               controller: emailController,
               decoration: InputDecoration(labelText: '이메일'),
             ),
@@ -89,7 +95,7 @@ class _LoginPageState extends State<login_email> {
             ),
             SizedBox(height: 48.0),
             ElevatedButton(
-              onPressed: signIn,
+              onPressed: signUp,
               child: Text('로그인'),
             ),
           ],
