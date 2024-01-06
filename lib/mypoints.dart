@@ -25,6 +25,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
     super.initState();
     gettodo();
     updateUser();
+
   }
   Future<void> updateUser() async {
     try {
@@ -51,13 +52,14 @@ class _MyPointsPage extends  State<MyPointsPage> {
       log('에러 발생 ${e}');
     }
   }
+
   Future<void> gettodo() async {
     log('todolist 불러오기');
     log('${User.current.token}');
 
     try {
       var response = await http.get(
-        Uri.parse('${basicUrl}/todo'), // 서버의 실제 URL로 변경
+        Uri.parse('${basicUrl}/todo'),
         headers: <String, String>{
           'Authorization': "Bearer ${User.current.token}"
         },
@@ -98,9 +100,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     var my_todo = todoList.getTodosByUser(User.current.id);
+    my_todoList = my_todo;
     //log(my_todo as String);
 
     void _onItemTapped(int index) {
@@ -113,7 +114,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
       appBar: AppBar(
         title: Text('My points'),
       ),
-      body: Column(
+      body: SingleChildScrollView(
+        child: Column(
         children: [
           // 사용자의 포인트와 이름을 표시하는 섹션
           _buildPointsSection(),
@@ -131,6 +133,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
               )
           ),
         ],
+      ),
       ),
 
       bottomNavigationBar: BottomNavigationBar(

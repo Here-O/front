@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import 'map.dart';
 import 'mypoints.dart';
 import 'todolist.dart';
+import 'globals.dart';
+import 'todo.dart';
 
 class TodoListTab extends StatefulWidget {
   @override
@@ -12,18 +16,37 @@ class _TodoListTabState extends State<TodoListTab> {
   int _selectedIndex = 1;
   TodoList todoList = TodoList();
   DateTime selectedDate = DateTime.now();
+  late String formattedSelectedDate;
 
   // Dummy list of to-dos for today.
-  List<String> todosForToday = [
-    'todolist context 1',
-    'todolist context 2',
-    'todolist context 3',
-  ];
+  List<todo>? my_todoList_c = my_todoList;
+
+
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void filterTodosBySelectedDate() {
+    // formattedSelectedDate에 해당하는 todo 객체들만 필터링
+
+    List<todo>? filteredTodos = my_todoList_c?.where((todo) {
+      return todo.date == formattedSelectedDate; // 날짜 비교
+    }).toList();
+
+    // 필터링된 리스트로 UI 업데이트
+    setState(() {
+      my_todoList_c = filteredTodos;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    formattedSelectedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+    filterTodosBySelectedDate();
   }
 
   @override
@@ -98,7 +121,7 @@ class _TodoListTabState extends State<TodoListTab> {
       padding: EdgeInsets.all(16),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(todosForToday.isNotEmpty ? todosForToday.first : 'No todos yet'),
+        child: Text(my_todoList_c?.first.context ?? 'No todos yet'),
       ),
     );
   }
@@ -126,11 +149,11 @@ class _TodoListTabState extends State<TodoListTab> {
   Widget _buildTodoList() {
     return Expanded(
       child: ListView.builder(
-        itemCount: todosForToday.length,
+        itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(todosForToday[index]),
-            trailing: Text('1 P+', style: TextStyle(color: Colors.red)),
+            title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
+            trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
           );
         },
       ),
