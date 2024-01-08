@@ -30,7 +30,7 @@ class _map extends State<map> {
   Location _location = Location();
   late NaverMapController _mapController;
   TextEditingController _searchController = TextEditingController();
-  late int int_send;
+  int _selectedIndex_map = 0;
 
   @override
   void initState() {
@@ -256,18 +256,18 @@ class _map extends State<map> {
     child: my_geos.isNotEmpty? ListView.builder(
     itemCount: my_geos?.length ?? 0,
       itemBuilder: (context, index) {
-        bool isSelected = index == _selectedIndex;
+        bool isSelected = index == _selectedIndex_map;
         return GestureDetector(
           onTap: () {
+            _selectedIndex_map = index;
+            selected_geo = my_geos[_selectedIndex_map];
               setState(() {
-                _selectedIndex = index;
-                final geo geo_send = my_geos[_selectedIndex];
               });
           },
 
           child: ListTile(
             title: Text(my_geos?[index].title ?? 'None'),
-            tileColor: isSelected ? Colors.white24 : Colors.white60,
+            tileColor: isSelected ? Colors.grey : Colors.white60,
           ),
         );
       },
@@ -277,7 +277,7 @@ class _map extends State<map> {
         SizedBox(height: 20,),
         if (widget.status ==1) ElevatedButton(
           onPressed: () {
-            selected_geo = my_geos[_selectedIndex];
+            selected_geo = my_geos[_selectedIndex_map];
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate_new)),

@@ -44,6 +44,7 @@ dependencies:
   permission_handler: ^11.1.0
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.9.0"
   flutter_test:
     sdk: flutter
 
@@ -54,6 +55,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^3.0.1
 
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/hereo_logo.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'map.dart';
 import 'mypoints.dart';
@@ -59,6 +60,7 @@ class _TodoListTabState extends State<TodoListTab> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('ko_KR', null); // 한국어 로케일 초기화
     filterTodosBySelectedDate();
   }
 
@@ -67,7 +69,7 @@ class _TodoListTabState extends State<TodoListTab> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todo List'),
+        title: Text('${selectedDate.day.toString()}일의 투두 리스트'),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -120,7 +122,7 @@ class _TodoListTabState extends State<TodoListTab> {
           DateTime date = selectedDate.subtract(Duration(days: 4 - index));
           bool isTodayOrBefore = date.isBefore(DateTime.now().add(Duration(days: 0)));
           bool isToday = date.day == DateTime.now().day;
-          String day = DateFormat('EEEE').format(date);
+          String day = DateFormat('E','ko_KR').format(date);
 
           return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
             onTap: () {

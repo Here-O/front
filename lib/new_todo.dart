@@ -143,6 +143,11 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
                 });
               },
             ),
+            Text('${selected_geo.title}',style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
