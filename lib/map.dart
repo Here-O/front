@@ -13,6 +13,7 @@ import 'mypoints.dart';
 import 'todo_view.dart';
 import 'globals.dart';
 import 'geo.dart';
+import 'new_todo.dart';
 
 class map extends StatefulWidget {
 
@@ -29,6 +30,7 @@ class _map extends State<map> {
   Location _location = Location();
   late NaverMapController _mapController;
   TextEditingController _searchController = TextEditingController();
+  late int int_send;
 
   @override
   void initState() {
@@ -190,7 +192,7 @@ class _map extends State<map> {
                 ),
 
               ),
-              Expanded(
+               Expanded(
                 child: buttonsSearch(),
               ),
             ],
@@ -254,14 +256,18 @@ class _map extends State<map> {
     child: my_geos.isNotEmpty? ListView.builder(
     itemCount: my_geos?.length ?? 0,
       itemBuilder: (context, index) {
+        bool isSelected = index == _selectedIndex;
         return GestureDetector(
           onTap: () {
-
+              setState(() {
+                _selectedIndex = index;
+                final geo geo_send = my_geos[_selectedIndex];
+              });
           },
 
           child: ListTile(
-            title: Text(my_geos?[index].title ?? 'None todolist context'),
-            tileColor: Colors.white60,
+            title: Text(my_geos?[index].title ?? 'None'),
+            tileColor: isSelected ? Colors.white24 : Colors.white60,
           ),
         );
       },
@@ -269,9 +275,13 @@ class _map extends State<map> {
         : Center(child : Text("검색 결과가 없습니다")),
     ),
         SizedBox(height: 20,),
-        ElevatedButton(
+        if (widget.status ==1) ElevatedButton(
           onPressed: () {
-
+            selected_geo = my_geos[_selectedIndex];
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate_new)),
+            );
         },
           child: Text('반영하기'),
           style: ElevatedButton.styleFrom(
