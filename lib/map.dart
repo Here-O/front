@@ -100,6 +100,8 @@ class _map extends State<map> {
           //log('geoo make');
           await geoo.get_latlang();
           //log('get suc');
+          // title 속성에서 <b>, </b> 제거
+          geoo.title = geoo.title.replaceAll("<b>", "").replaceAll("</b>", "");
           my_geos.add(geoo);
           //log('add suc');
           log(geoo.lat ?? 'None');
