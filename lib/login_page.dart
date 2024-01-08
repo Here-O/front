@@ -10,6 +10,7 @@ import 'login_email.dart';
 import 'user.dart';
 import 'map.dart';
 import 'mypoints.dart';
+import 'sign_up.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -151,7 +152,7 @@ class _LoginPage extends State<LoginPage> {
               // 'Sign Up' 버튼
               TextButton(
                 onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => login_email()));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SignUpPage()));
                 },
                 child: Text('New User? Sign Up'),
               ),
