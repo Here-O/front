@@ -144,10 +144,10 @@ class _map extends State<map> {
         _mapController.updateCamera(
             NCameraUpdate.fromCameraPosition(
                 NCameraPosition(
-                    target: NLatLng(latitude, longitude),
-                    zoom: 15,
-                    bearing: 45,
-                    tilt: 30,
+                  target: NLatLng(latitude, longitude),
+                  zoom: 15,
+                  bearing: 45,
+                  tilt: 30,
                 )));
 
       });
@@ -193,7 +193,7 @@ class _map extends State<map> {
                 ),
 
               ),
-               Expanded(
+              Expanded(
                 child: buttonsSearch(),
               ),
             ],
@@ -253,28 +253,28 @@ class _map extends State<map> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 버튼들 사이에 공간을 균등하게 배분
       children: [
-    Expanded(
-    child: my_geos.isNotEmpty? ListView.builder(
-    itemCount: my_geos?.length ?? 0,
-      itemBuilder: (context, index) {
-        bool isSelected = index == _selectedIndex_map;
-        return GestureDetector(
-          onTap: () {
-            _selectedIndex_map = index;
-            selected_geo = my_geos[_selectedIndex_map];
-              setState(() {
-              });
-          },
+        Expanded(
+          child: my_geos.isNotEmpty? ListView.builder(
+            itemCount: my_geos?.length ?? 0,
+            itemBuilder: (context, index) {
+              bool isSelected = index == _selectedIndex_map;
+              return GestureDetector(
+                onTap: () {
+                  _selectedIndex_map = index;
+                  selected_geo = my_geos[_selectedIndex_map];
+                  setState(() {
+                  });
+                },
 
-          child: ListTile(
-            title: Text(my_geos?[index].title ?? 'None'),
-            tileColor: isSelected ? Colors.grey : Colors.white60,
-          ),
-        );
-      },
-    )
-        : Center(child : Text("검색 결과가 없습니다")),
-    ),
+                child: ListTile(
+                  title: Text(my_geos?[index].title ?? 'None'),
+                  tileColor: isSelected ? Colors.grey : Colors.white60,
+                ),
+              );
+            },
+          )
+              : Center(child : Text("검색 결과가 없습니다")),
+        ),
         SizedBox(height: 20,),
         if (widget.status ==1) ElevatedButton(
           onPressed: () {
@@ -283,7 +283,7 @@ class _map extends State<map> {
               context,
               MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate_new)),
             );
-        },
+          },
           child: Text('반영하기'),
           style: ElevatedButton.styleFrom(
             primary: Colors.red, // 배경색은 빨간색
