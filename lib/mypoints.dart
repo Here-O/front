@@ -237,7 +237,9 @@ class _MyPointsPage extends  State<MyPointsPage> {
           title: Text(todoo.context), // Todo의 context 표시
           subtitle: Text(todoo.date), // Todo의 date 표시
           trailing: Text('${todoo.point} P+', style: TextStyle(color: Colors.red)),
-
+          tileColor:todoo.done
+              ? Colors.lightBlue // todoo.done이 true면 파란색
+              : null,
 
         );
       },

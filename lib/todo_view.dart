@@ -9,6 +9,7 @@ import 'todolist.dart';
 import 'globals.dart';
 import 'todo.dart';
 import 'new_todo.dart';
+import 'editTodo.dart';
 
 class TodoListTab extends StatefulWidget {
   @override
@@ -42,9 +43,16 @@ class _TodoListTabState extends State<TodoListTab> {
       return todo.date == formattedSelectedDate; // 날짜 비교
     }).toList();
 
-    // 필터링된 리스트로 UI 업데이트
     setState(() {
       my_todoList_c = filteredTodos;
+    });
+  }
+
+  Future<void> _refreshData() async {
+    await Future.delayed(Duration(seconds: 1)); // 예시로 2초간 대기 (실제 데이터 로딩 로직으로 대체)
+
+    setState(() {
+      filterTodosBySelectedDate();
     });
   }
 
@@ -56,11 +64,14 @@ class _TodoListTabState extends State<TodoListTab> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Todo List'),
       ),
-      body: Column(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           SizedBox(height: 20),
@@ -68,11 +79,11 @@ class _TodoListTabState extends State<TodoListTab> {
             //height: 100, // _buildDateScroll에 고정된 높이를 줍니다.
             child: _buildDateScroll(),
           ),
-
           _buildFirstTodo(),
           _buildAddTodoButton(),
           _buildTodoList(),
         ],
+      ),
       ),
 
       bottomNavigationBar: BottomNavigationBar(
@@ -118,7 +129,6 @@ class _TodoListTabState extends State<TodoListTab> {
                 log(selectedDate.day.toString());
                 filterTodosBySelectedDate();
               });
-
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -168,7 +178,7 @@ class _TodoListTabState extends State<TodoListTab> {
 
       child: ElevatedButton.icon(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => TodoResponsePage()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate)));
         },
         icon: Icon(Icons.add),
         label: Text('Add Todo'),
@@ -185,14 +195,23 @@ class _TodoListTabState extends State<TodoListTab> {
       child: my_todoList_c.isNotEmpty? ListView.builder(
         itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
-          return ListTile(
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditTodo(todoId: my_todoList_c?[index].id ?? '000000')),
+              );
+            },
+
+            child: ListTile(
             title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
             trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
             tileColor: my_todoList_c[index].done
-                ? Colors.blue // todoo.done이 true면 파란색
+                ? Colors.lightGreenAccent // todoo.done이 true면 파란색
                 : my_todoList_c[index].routine
-                ? Colors.yellow // todoo.routine이 true면 노란색
+                ? Colors.yellowAccent // todoo.routine이 true면 노란색
                 : null,
+          ),
           );
         },
       )
