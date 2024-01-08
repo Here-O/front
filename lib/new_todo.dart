@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:intl/intl.dart';
-
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'todo.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,6 +28,8 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
   TextEditingController _contextController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
   TextEditingController _pointController = TextEditingController();
+  TextEditingController _queryController = TextEditingController();
+
   bool _isRoutine = false;
   todo? _todo;
 
@@ -131,23 +133,15 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
               child: Text('Create Todo'),
             ),
             SizedBox(height: 20),
-            if (_todo != null) _buildTodoDetails(),
+            ElevatedButton(
+              onPressed : _createTodo,
+              child: Text('Create Todo'),
+            ),
           ],
         ),
       ),
+
     );
   }
 
-  Widget _buildTodoDetails() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Context: ${_todo!.context}', style: TextStyle(fontSize: 16)),
-        Text('Date: ${_todo!.date}', style: TextStyle(fontSize: 16)),
-        Text('Point: ${_todo!.point}', style: TextStyle(fontSize: 16)),
-        Text('Routine: ${_todo!.routine}', style: TextStyle(fontSize: 16)),
-        // 기타 필요한 필드들을 여기에 표시합니다.
-      ],
-    );
-  }
 }

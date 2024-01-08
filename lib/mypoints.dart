@@ -73,14 +73,14 @@ class _MyPointsPage extends  State<MyPointsPage> {
 
         final responseJson = json.decode(response.body);
 
-        log("for 처리 전");
+        //log("for 처리 전");
         for (var todoJson in responseJson["Todo"]) {
-          log("todoo 생성 전");
-          log(todoJson.toString());
+          //log("todoo 생성 전");
+          //log(todoJson.toString());
           var todoo = todo.fromJson(todoJson);
           log("todoo 생성 완료");
           todoList.addTodo(todoo);
-          log("for 처리 중");
+          //log("for 처리 중");
         }
         setState(() {
           // UI 업데이트를 위해 setState 호출
@@ -146,7 +146,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         selectedItemColor: Colors.purple, // 선택된 아이템의 색상
         onTap: (index) {
           if (index == 0) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => map()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => map(status: 0,)));
             _onItemTapped(index);
           } else if (index == 1) {
             Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));

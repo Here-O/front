@@ -96,7 +96,7 @@ class _TodoListTabState extends State<TodoListTab> {
         selectedItemColor: Colors.purple, // 선택된 아이템의 색상
         onTap: (index) {
           if (index == 0) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => map()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => map(status: 0,)));
             _onItemTapped(index);
           } else if (index == 1) {
             Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));
