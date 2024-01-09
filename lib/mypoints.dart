@@ -24,8 +24,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
   List<dynamic> completedTodoList = [];  // 클릭한 사용자의 완료된 todo리스트
 
   // 이미지 클릭 이벤트
-  void onImageTap(TopUser user) async {
-    try{
+  void onImageTap(TopUser user, BuildContext context) async {
+    try {
       var response = await http.post(
         Uri.parse('${basicUrl}/points'),
         headers: <String, String>{
@@ -34,17 +34,37 @@ class _MyPointsPage extends  State<MyPointsPage> {
         },
         body: jsonEncode({'id': user.id}),
       );
+      log("onImageTap_userId: ${user.id}");
 
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         setState(() {
           completedTodoList = responseJson["completedTodoList"];
+          log('completedTodoList updated: ${completedTodoList}');
         });
+
+        showDialog(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            log('Show dialog for user ${user.name}');
+            return AlertDialog(
+              title: Text('${user.name}의 Todos'),
+              content: _buildCompletedTodoList(), // 완료된 Todo 리스트를 팝업 내부에 표시
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 팝업 닫기
+                  },
+                ),
+              ],
+            );
+          },
+        );
       } else {
         Fluttertoast.showToast(msg: 'Failed to load completed todos');
       }
     } catch (e) {
-      // 에러 처리
       Fluttertoast.showToast(msg: 'Error: $e');
     }
   }
@@ -266,8 +286,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         itemBuilder: (BuildContext context, int index) {
           TopUser user = topUsers[index];
           return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
-            onTap: () => onImageTap(user),
-            child: Expanded(
+            onTap: () => onImageTap(user, context),
             child:  Column (
             children: <Widget> [
               CircleAvatar(
@@ -291,7 +310,6 @@ class _MyPointsPage extends  State<MyPointsPage> {
               )
 
               ],
-            ),
             ),
           );
         },
