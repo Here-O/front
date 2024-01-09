@@ -21,6 +21,34 @@ class _MyPointsPage extends  State<MyPointsPage> {
   TodoList todoList = TodoList();
   int _selectedIndex = 2;
   List<TopUser> topUsers = [];
+  List<dynamic> completedTodoList = [];  // 클릭한 사용자의 완료된 todo리스트
+
+  // 이미지 클릭 이벤트
+  void onImageTap(TopUser user) async {
+    try{
+      var response = await http.post(
+        Uri.parse('${basicUrl}/points'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${User.current.token}',
+        },
+        body: jsonEncode({'id': user.id}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        setState(() {
+          completedTodoList = responseJson["completedTodoList"];
+        });
+      } else {
+        // 실패 시 처리
+        Fluttertoast.showToast(msg: 'Failed to load completed todos');
+      }
+    } catch (e) {
+      // 에러 처리
+      Fluttertoast.showToast(msg: 'Error: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -163,6 +191,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
                   children: [
                     _buildFilterButtons(),
                     _buildTodoListStatus(my_todo),
+                    _buildCompletedTodoList(),
                   ],
                 )
             ),
@@ -194,6 +223,25 @@ class _MyPointsPage extends  State<MyPointsPage> {
     );
   }
 
+  // 완료된 Todo 리스트 표시 위젯
+  Widget _buildCompletedTodoList() {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: completedTodoList.length,
+      itemBuilder: (BuildContext context, int index) {
+        var todoo = completedTodoList[index];
+        return ListTile(
+          title: Text(todoo["context"]),
+          subtitle: Text(todoo["date"]),
+          trailing: Text('${todoo["point"]} P+', style: TextStyle(color: Colors.red)),
+          tileColor: todoo["done"] ? Colors.lightBlue : null,
+        );
+      },
+    );
+  }
+
   Widget _buildPointsSection() {
     final userName = User.current?.name;
     final userPoints = User.current?.points;
@@ -219,9 +267,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         itemBuilder: (BuildContext context, int index) {
           TopUser user = topUsers[index];
           return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
-            onTap: () {
-              print('Avatar ${user.name} clicked');
-            },
+            onTap: () => onImageTap(user),
             child: Expanded(
             child:  Column (
             children: <Widget> [
