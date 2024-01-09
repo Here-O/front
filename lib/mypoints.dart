@@ -25,7 +25,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
 
   // 이미지 클릭 이벤트
   void onImageTap(TopUser user) async {
-    try{
+    try {
       var response = await http.post(
         Uri.parse('${basicUrl}/points'),
         headers: <String, String>{
@@ -40,12 +40,28 @@ class _MyPointsPage extends  State<MyPointsPage> {
         setState(() {
           completedTodoList = responseJson["completedTodoList"];
         });
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('${user.name}의 Todos'),
+              content: _buildCompletedTodoList(), // 완료된 Todo 리스트를 팝업 내부에 표시
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 팝업 닫기
+                  },
+                ),
+              ],
+            );
+          },
+        );
       } else {
-        // 실패 시 처리
         Fluttertoast.showToast(msg: 'Failed to load completed todos');
       }
     } catch (e) {
-      // 에러 처리
       Fluttertoast.showToast(msg: 'Error: $e');
     }
   }
