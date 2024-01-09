@@ -287,7 +287,6 @@ class _MyPointsPage extends  State<MyPointsPage> {
           TopUser user = topUsers[index];
           return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
             onTap: () => onImageTap(user, context),
-            child: Expanded(
             child:  Column (
             children: <Widget> [
               CircleAvatar(
@@ -311,7 +310,6 @@ class _MyPointsPage extends  State<MyPointsPage> {
               )
 
               ],
-            ),
             ),
           );
         },
