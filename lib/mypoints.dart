@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hereo/topUser.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -19,15 +20,17 @@ class MyPointsPage extends StatefulWidget {
 class _MyPointsPage extends  State<MyPointsPage> {
   TodoList todoList = TodoList();
   int _selectedIndex = 2;
+  List<TopUser> topUsers = [];
 
   @override
   void initState() {
     super.initState();
     gettodo();
     updateUser();
+    getTopPoints();
 
   }
-  Future<void> updateUser() async {
+  Future<void> updateUser() async {  // 마이페이지 정보 확인
     try {
       var response = await http.get(
         Uri.parse('${basicUrl}/mypage'),
@@ -53,7 +56,38 @@ class _MyPointsPage extends  State<MyPointsPage> {
     }
   }
 
-  Future<void> gettodo() async {
+  Future<void> getTopPoints() async {
+    log('포인트 상위 5명 조회하기');
+    try {
+      var response = await http.get(
+        Uri.parse('${basicUrl}/points/top'),
+        headers: <String, String>{
+          'Authorization': 'Bearer ${User.current.token}'
+        },
+      );
+
+      log('요청 완료');
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        List<TopUser> loadedTopUsers = [];
+
+        for (var topUserJson in responseJson["topUsers"]) {
+          loadedTopUsers.add(TopUser.fromJson(topUserJson));
+        }
+        setState(() {
+          topUsers = loadedTopUsers;  // 상태변수 업데이트
+        });
+
+      } else{
+        log('TopUsers 조회 실패: ${response.body}');
+      }
+
+    } catch (e) {
+      log('에러발생 ${e}');
+    }
+  }
+
+  Future<void> gettodo() async {  // todo 조회
     log('todolist 불러오기');
     log('${User.current.token}');
 
@@ -74,7 +108,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         final responseJson = json.decode(response.body);
 
         //log("for 처리 전");
-        for (var todoJson in responseJson["Todo"]) {
+        for (var todoJson in responseJson["Todo"]) {  // json객체 내에 Todo에 해당하는 데이터처리 반복
           //log("todoo 생성 전");
           //log(todoJson.toString());
           var todoo = todo.fromJson(todoJson);
@@ -181,19 +215,20 @@ class _MyPointsPage extends  State<MyPointsPage> {
       height: 150.0, // 친구 아이콘의 반지름에 맞춰 높이를 조절합니다.
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 5, // 친구의 수에 따라 조절
+        itemCount: topUsers.length, // 친구의 수에 따라 조절
         itemBuilder: (BuildContext context, int index) {
+          TopUser user = topUsers[index];
           return GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
             onTap: () {
               // 클릭 시 실행할 함수
-              print('Avatar $index clicked');
+              print('Avatar ${user.name} clicked');
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
                 radius: 50.0, // 반지름을 50.0으로 설정하여 크기를 키웁니다.
-                backgroundColor: Colors.blue[900], // 짙은 파란색으로 설정합니다.
-                child: Text('p$index'), // 친구의 이니셜이나 이미지를 표시할 수 있습니다.
+                backgroundImage: NetworkImage(user.image), // 네트워크 이미지 사용
+                child: Text('${user.points} P'), // 친구의 이니셜이나 이미지를 표시할 수 있습니다.
               ),
             ),
           );
