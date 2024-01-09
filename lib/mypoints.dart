@@ -39,11 +39,13 @@ class _MyPointsPage extends  State<MyPointsPage> {
         final responseJson = json.decode(response.body);
         setState(() {
           completedTodoList = responseJson["completedTodoList"];
+          log('completedTodoList updated: ${completedTodoList}');
         });
 
         showDialog(
           context: context,
           builder: (BuildContext context) {
+            log('Show dialog for user ${user.name}');
             return AlertDialog(
               title: Text('${user.name}의 Todos'),
               content: _buildCompletedTodoList(), // 완료된 Todo 리스트를 팝업 내부에 표시
