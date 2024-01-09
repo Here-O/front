@@ -126,7 +126,7 @@ class _EditTodo extends State<EditTodo> {
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TodoListTab()),
+          MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)),
         );
       });
     } catch(e) {
@@ -206,7 +206,7 @@ class _EditTodo extends State<EditTodo> {
           ),
         ),
         ElevatedButton(
-          onPressed: _editTodo,
+          onPressed: _contextController.text.isNotEmpty&_pointController.text.isNotEmpty ? _editTodo : null,
           child: Text('수정'),
           style: ElevatedButton.styleFrom(
             primary: Colors.white, // 배경색은 흰색

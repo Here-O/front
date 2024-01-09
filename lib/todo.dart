@@ -15,6 +15,7 @@ class todo {
   String user;
   var id;
   DateTime? doneAt;
+  String? roadAdress;
 
   todo({required this.context, required this.date, required this.latitude, required this.longitude,
     required this.done, required this.routine, this.point, required this.user, this.id, this.doneAt});

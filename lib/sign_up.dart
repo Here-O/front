@@ -66,7 +66,7 @@ class _SignUpPage extends State<SignUpPage> {
           log('회원가입 성공');
           // Navigator.push, Navigator.pushReplacement로 새 화면 전환
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => TodoListTab()));
+              context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)));
         } else {
           log('이미 가입된 이메일입니다.');
           Fluttertoast.showToast(

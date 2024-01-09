@@ -31,6 +31,7 @@ class _map extends State<map> {
   late NaverMapController _mapController;
   TextEditingController _searchController = TextEditingController();
   int _selectedIndex_map = 0;
+  bool loc_auth = false;
 
   @override
   void initState() {
@@ -44,34 +45,20 @@ class _map extends State<map> {
     });
   }
 
-  void _showSearch() async {
-    log('begin');
-    //await Future.delayed(Duration(seconds: 1));
-    Set<NAddableOverlay> set_over = {};
-
-
-    var lat_d = double.parse(selected_geo.lat ?? '36.00');
-    var long_d = double.parse(selected_geo.long ?? '137.00');
-
-    var latLng = NLatLng(lat_d, long_d);
-    log('latlang build');
-    final marker = NMarker(id: 'test', position: latLng);
-    log('marker build');
-    _mapController.updateCamera(
-        NCameraUpdate.fromCameraPosition(
-            NCameraPosition(
-              target: latLng,
-              zoom: 15,
-              bearing: 45,
-              tilt: 30,
-            )));
-    set_over.add(marker);
-
-    _mapController.addOverlay(marker);
-    log('marker added');
-
-
+  void _loc_auth() {
+    if (loc_auth) {
+      Fluttertoast.showToast(msg: '인증 성공');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: true)),
+      );
+      loc_auth = false;
+    }
+    else {
+      Fluttertoast.showToast(msg: '인증 실패');
+    }
   }
+
 
   Future<void> _search() async {
     my_geos = [];
@@ -116,12 +103,11 @@ class _map extends State<map> {
             fontSize: 16.0
         );
 
-
       } else {
         log("add failed");
       }
       setState(() {
-        _showSearch();
+
       });
     } catch(e) {
       log('에러 발생 ${e}');
@@ -133,12 +119,12 @@ class _map extends State<map> {
     var status = await Permission.location.request();
 
     if (status.isGranted) {
-      log("Location permission granted.");
-      _location.onLocationChanged.listen((LocationData currentLocation) {
-        log("user_loc success");
+      //log("Location permission granted.");
+      _location.onLocationChanged.listen((LocationData currentLocation) async {
+        //log("user_loc success");
         double latitude = currentLocation.latitude ?? 0.0;
         double longitude = currentLocation.longitude ?? 0.0;
-        log("before updateCamera");
+        //log("before updateCamera");
         log(latitude.toString());
         log(longitude.toString());
         _mapController.updateCamera(
@@ -152,16 +138,48 @@ class _map extends State<map> {
 
         var latLng = NLatLng(latitude, longitude);
         final marker = NCircleOverlay(id: 'user', center: latLng, radius: 10, color: Colors.blue);
-
         _mapController.addOverlay(marker);
+
+        try {
+          var response = await http.get(
+            Uri.parse("https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${selected_geo.roadAddress}&coordinate=${longitude}, ${latitude}"),
+            headers: <String, String>{
+              'X-NCP-APIGW-API-KEY-ID': "okzqmxz8pr",
+              'X-NCP-APIGW-API-KEY': 'dEpiYrVbgl1OeWTX0pgL6NOVVVVH95yti4L63SaF'
+            },
+          );
+
+          //log('${response.body}');
+          final responseJson = json.decode(response.body);
+          log(responseJson["addresses"][0]["distance"].toString());
+          if (response.statusCode == 200) {
+            var dist = responseJson["addresses"][0]["distance"];
+            if (dist <= 500) {
+              if (loc_auth) {
+
+              } else {
+                setState(() {
+                  loc_auth = true;
+                });
+              }
+              log('loc_auth succes');
+            }  else {
+              loc_auth = false;
+            }
+          } else {
+            log("dist failed");
+          }
+        } catch(e) {
+          log('에러 발생 ${e}');
+        }
 
         var lat_d = double.parse(selected_geo.lat ?? '36.00');
         var long_d = double.parse(selected_geo.long ?? '137.00');
         var latLng_s = NLatLng(lat_d, long_d);
 
         final marker_s = NMarker(id: 'test', position: latLng_s);
-
         _mapController.addOverlay(marker_s);
+
       });
     } else if (status.isDenied) {
       log("Location permission denied.");
@@ -226,7 +244,7 @@ class _map extends State<map> {
             Navigator.push(context, MaterialPageRoute(builder: (context) => map(status: 0,)));
             _onItemTapped(index);
           } else if (index == 1) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)));
             _onItemTapped(index);
           } else {
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
@@ -280,7 +298,7 @@ class _map extends State<map> {
 
                 child: ListTile(
                   title: Text(my_geos?[index].title ?? 'None'),
-                  tileColor: isSelected ? Colors.grey : Colors.white60,
+                  tileColor: isSelected ? Colors.grey.shade300 : Colors.white60,
                 ),
               );
             },
@@ -302,7 +320,16 @@ class _map extends State<map> {
             onPrimary: Colors.white,
           ),
         ),
-
+        if (widget.status ==2) ElevatedButton(
+          onPressed: () {
+              _loc_auth();
+          },
+          child: loc_auth? Text('눌러서 인증 완료하기') : Text('더 가깝게 가주세요!'),
+          style: ElevatedButton.styleFrom(
+            primary: loc_auth? Colors.redAccent.shade200 : Colors.blue.shade200,
+            onPrimary: Colors.white,
+          ),
+        ),
       ],
     );
   }

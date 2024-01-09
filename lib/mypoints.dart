@@ -41,7 +41,6 @@ class _MyPointsPage extends  State<MyPointsPage> {
           completedTodoList = responseJson["completedTodoList"];
         });
       } else {
-        // 실패 시 처리
         Fluttertoast.showToast(msg: 'Failed to load completed todos');
       }
     } catch (e) {
@@ -212,7 +211,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
             Navigator.push(context, MaterialPageRoute(builder: (context) => map(status: 0,)));
             _onItemTapped(index);
           } else if (index == 1) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)));
             _onItemTapped(index);
           } else {
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyPointsPage()));

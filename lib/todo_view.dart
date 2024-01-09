@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hereo/user.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
+import 'package:http/http.dart' as http;
+import 'geo.dart';
 import 'map.dart';
 import 'mypoints.dart';
 import 'todolist.dart';
@@ -13,6 +17,10 @@ import 'new_todo.dart';
 import 'editTodo.dart';
 
 class TodoListTab extends StatefulWidget {
+  final bool loc_auth;
+
+  TodoListTab({Key? key, required this.loc_auth}) : super(key: key);
+
   @override
   _TodoListTabState createState() => _TodoListTabState();
 }
@@ -21,7 +29,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
   int _selectedIndex = 1;
   TodoList todoList = TodoList();
   DateTime selectedDate = DateTime.now();
-  sdlate int _selectedTodo = 0;
+  late int _selectedTodo = 0;
 
   late String formattedSelectedDate;
   late AnimationController controller;
@@ -36,8 +44,56 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
     });
   }
 
-  void filterTodosBySelectedDate() {
-    // formattedSelectedDate에 해당하는 todo 객체들만 필터링
+  Future<void> filterTodosBySelectedDate() async {
+    log('start');
+    if (widget.loc_auth) {
+      Fluttertoast.showToast(msg: '해당 투두 인증 완료');
+      int index = my_todoList.indexWhere((todo) => todo.id == selected_todoId);
+      if (index != -1) {
+        my_todoList[index].done = true;
+        log('edit success');
+      }
+      try {
+        var response = await http.post(
+          Uri.parse('${basicUrl}/todo'),
+          headers: <String, String>{
+            'Authorization': "Bearer ${User.current.token}",
+            'Content-Type': 'application/json'
+          },
+          body: jsonEncode( {
+            'id' : my_todoList[index].id,
+            'context': my_todoList[index].context,
+            'date': my_todoList[index].date,
+            'latitude': my_todoList[index].latitude,
+            'longitude': my_todoList[index].longitude,
+            'done': true,
+            'routine': my_todoList[index].routine,
+            'point': my_todoList[index].point,
+          }),
+        );
+
+        log('${response.body}');
+
+        if (response.statusCode == 200) {
+          my_todoList.removeWhere((td) => td.id == selected_todoId);
+          final responseJson = json.decode(response.body);
+          final todoJson = responseJson["Todo"];
+          var todoo = todo.fromJson(todoJson);
+          //log("todoo 생성 완료");
+          my_todoList.add(todoo);
+        } else {
+          log("add failed");
+        }
+
+      } catch(e) {
+        log('에러 발생 ${e}');
+      }
+      setState(() {
+      });
+    } else {
+      log('edit failed');
+    }
+
     my_todoList_c = my_todoList;
 
     log(selectedDate.day.toString());
@@ -71,6 +127,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
       duration: const Duration(seconds: 1),
       vsync: this,
     );
+
   }
 
   @override
@@ -116,7 +173,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
             Navigator.push(context, MaterialPageRoute(builder: (context) => map(status: 0,)));
             _onItemTapped(index);
           } else if (index == 1) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)));
             _onItemTapped(index);
           } else {
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
@@ -153,7 +210,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
                 children: <Widget>[
                   Text(day),
                   CircleAvatar(
-                    backgroundColor: isToday ? Colors.green : (isTodayOrBefore ? Colors.blue : Colors.grey),
+                    backgroundColor: isToday ? Colors.yellow.shade300 : (isTodayOrBefore ? Colors.green.shade300 : Colors.grey.shade200),
                     child: Text('${date.day}'),
                   ),
                 ],
@@ -197,10 +254,10 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate)));
         },
-        icon: Icon(Icons.add),
-        label: Text('Add Todo'),
+        icon: Icon(Icons.add, color: Colors.white,),
+        label: Text('Add Todo', style: TextStyle(color: Colors.white60)),
         style: ElevatedButton.styleFrom(
-          primary: Colors.blue, // Button color
+          primary: Colors.green.shade300, // Button color
         ),
       ),
     ),
@@ -208,8 +265,24 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
   }
   void _handleDragEnd(DragEndDetails details) {
     setState(() {
+      selected_todoId = my_todoList_c[_selectedTodo].id;
       isDragged = !isDragged;
       isDragged ? controller.forward() : controller.reverse();
+    });
+
+    selected_geo = geo(title: my_todoList_c[_selectedTodo].context, mapx: '0', mapy: '0', roadAddress: '대전광역시 유성구 대학로 291 (한국과학기술원)');
+    selected_geo.lat = my_todoList_c[_selectedTodo].latitude;
+    selected_geo.long = my_todoList_c[_selectedTodo].longitude;
+    selected_geo.roadAddress = my_todoList_c[_selectedTodo].roadAdress ?? '대전광역시 유성구 대학로 291 (한국과학기술원)';
+
+    log(selected_geo.roadAddress);
+    log(selected_geo.title);
+
+    Future.delayed(Duration(milliseconds: 550), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => map(status: 2)),
+      );
     });
   }
   Widget _buildTodoList() {
@@ -218,18 +291,28 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
         itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onHorizontalDragEnd: _handleDragEnd,
+            onHorizontalDragStart: (details) {
+              _selectedTodo = index;
+            },
+            onTap: () {
+              setState(() {
+                _selectedTodo = index;
+                selected_todoId = my_todoList_c[_selectedTodo].id;
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EditTodo(todoId: selected_todoId,)));
+              });
+            },
+            onHorizontalDragEnd:  _handleDragEnd,
             child: AnimatedContainer(
-              duration: controller.duration!,
+              duration: Duration(milliseconds: 500),
               decoration: BoxDecoration(
-                gradient: isDragged
+                gradient: isDragged & (index == _selectedTodo)
                     ? LinearGradient(
-                  colors: [Colors.blue, Colors.red],
+                  colors: [Colors.grey, Colors.white],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 )
                     : LinearGradient(
-                  colors: [Colors.grey, Colors.white],
+                  colors: [my_todoList_c[index].done? Colors.blue.shade100 : Colors.white, my_todoList_c[index].done? Colors.blue.shade200 : Colors.white],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -238,11 +321,6 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
               child: ListTile(
                 title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
                 trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
-                tileColor: my_todoList_c[index].done
-                    ? Colors.lightGreenAccent // todoo.done이 true면 파란색
-                    : my_todoList_c[index].routine
-                    ? Colors.yellowAccent // todoo.routine이 true면 노란색
-                    : null,
               ),
             ),
           );

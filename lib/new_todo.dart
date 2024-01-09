@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hereo/todo_view.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'geo.dart';
@@ -78,6 +79,8 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
         final todoJson = responseJson["Todo"];
         var todoo = todo.fromJson(todoJson);
         log("todoo 생성 완료");
+
+        todoo.roadAdress = selected_geo.roadAddress;
         my_todoList.add(todoo);
 
         var token = User.current.token;
@@ -86,17 +89,9 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
         log("add failed");
       }
       setState(() {
-        _todo = todo(
-          context: _contextController.text,
-          date: _dateController.text,
-          point: int.tryParse(_pointController.text) ?? 0,
-          routine: _isRoutine,
-          done: false,
-          user: User.current.id,
-          latitude: '36.00',
-          longitude:'80.00',
-        );
       });
+      Fluttertoast.showToast(msg: '생성 완료');
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth:false,)));
     } catch(e) {
       log('에러 발생 ${e}');
     }
@@ -123,6 +118,9 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
                 labelText: 'Context',
                 border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                setState(() {}); // TextField 값이 변경될 때마다 UI를 업데이트합니다.
+              },
             ),
             SizedBox(height: 10),
             TextField(
@@ -132,6 +130,9 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {}); // TextField 값이 변경될 때마다 UI를 업데이트합니다.
+              },
             ),
             SizedBox(height: 10),
             SwitchListTile(
@@ -186,7 +187,7 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
 
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed : _createTodo,
+              onPressed : _contextController.text.isNotEmpty&_pointController.text.isNotEmpty ? _createTodo : null,
               child: Text('Create Todo'),
             ),
 
