@@ -49,28 +49,28 @@ class _map extends State<map> {
     //await Future.delayed(Duration(seconds: 1));
     Set<NAddableOverlay> set_over = {};
 
-    for (var geoo in my_geos) {
-      var lat_d = double.parse(geoo.lat ?? '36.00');
-      var long_d = double.parse(geoo.long ?? '137.00');
 
-      var latLng = NLatLng(lat_d, long_d);
-      log('latlang build');
-      final marker = NMarker(id: '1', position: latLng);
-      log('marker build');
-      set_over.add(marker);
+    var lat_d = double.parse(selected_geo.lat ?? '36.00');
+    var long_d = double.parse(selected_geo.long ?? '137.00');
 
-    }
-    _mapController.addOverlayAll(set_over);
-    log('marker added');
-
+    var latLng = NLatLng(lat_d, long_d);
+    log('latlang build');
+    final marker = NMarker(id: 'test', position: latLng);
+    log('marker build');
     _mapController.updateCamera(
         NCameraUpdate.fromCameraPosition(
             NCameraPosition(
-              target: NLatLng(double.parse(my_geos[0].lat ?? '137.00'), double.parse(my_geos[0].long ?? '36.00')),
+              target: latLng,
               zoom: 15,
               bearing: 45,
               tilt: 30,
             )));
+    set_over.add(marker);
+
+    _mapController.addOverlay(marker);
+    log('marker added');
+
+
   }
 
   Future<void> _search() async {
@@ -150,6 +150,18 @@ class _map extends State<map> {
                   tilt: 30,
                 )));
 
+        var latLng = NLatLng(latitude, longitude);
+        final marker = NCircleOverlay(id: 'user', center: latLng, radius: 10, color: Colors.blue);
+
+        _mapController.addOverlay(marker);
+
+        var lat_d = double.parse(selected_geo.lat ?? '36.00');
+        var long_d = double.parse(selected_geo.long ?? '137.00');
+        var latLng_s = NLatLng(lat_d, long_d);
+
+        final marker_s = NMarker(id: 'test', position: latLng_s);
+
+        _mapController.addOverlay(marker_s);
       });
     } else if (status.isDenied) {
       log("Location permission denied.");
@@ -186,8 +198,8 @@ class _map extends State<map> {
                     consumeSymbolTapEvents: false,
                   ),
                   onMapReady: (controller) async {
-                    //_mapController = controller;
                     mapControllerCompleter.complete(controller);
+                    _mapController = controller;
                     log("onMapReady", name:"onMapReady");
                   },
                 ),
@@ -260,9 +272,9 @@ class _map extends State<map> {
               bool isSelected = index == _selectedIndex_map;
               return GestureDetector(
                 onTap: () {
-                  _selectedIndex_map = index;
-                  selected_geo = my_geos[_selectedIndex_map];
                   setState(() {
+                    _selectedIndex_map = index;
+                    selected_geo = my_geos[_selectedIndex_map];
                   });
                 },
 
@@ -286,8 +298,8 @@ class _map extends State<map> {
           },
           child: Text('반영하기'),
           style: ElevatedButton.styleFrom(
-            primary: Colors.red, // 배경색은 빨간색
-            onPrimary: Colors.white, // 글자색은 흰색
+            primary: Colors.red,
+            onPrimary: Colors.white,
           ),
         ),
 

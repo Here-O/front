@@ -17,11 +17,15 @@ class TodoListTab extends StatefulWidget {
   _TodoListTabState createState() => _TodoListTabState();
 }
 
-class _TodoListTabState extends State<TodoListTab> {
+class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
   TodoList todoList = TodoList();
   DateTime selectedDate = DateTime.now();
+  sdlate int _selectedTodo = 0;
+
   late String formattedSelectedDate;
+  late AnimationController controller;
+  bool isDragged = false;
 
   // Dummy list of to-dos for today.
   List<todo> my_todoList_c = my_todoList;
@@ -60,8 +64,19 @@ class _TodoListTabState extends State<TodoListTab> {
   @override
   void initState() {
     super.initState();
+
     initializeDateFormatting('ko_KR', null); // 한국어 로케일 초기화
     filterTodosBySelectedDate();
+    controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -191,33 +206,49 @@ class _TodoListTabState extends State<TodoListTab> {
     ),
     );
   }
-
+  void _handleDragEnd(DragEndDetails details) {
+    setState(() {
+      isDragged = !isDragged;
+      isDragged ? controller.forward() : controller.reverse();
+    });
+  }
   Widget _buildTodoList() {
     return Expanded(
       child: my_todoList_c.isNotEmpty? ListView.builder(
         itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EditTodo(todoId: my_todoList_c?[index].id ?? '000000')),
-              );
-            },
+            onHorizontalDragEnd: _handleDragEnd,
+            child: AnimatedContainer(
+              duration: controller.duration!,
+              decoration: BoxDecoration(
+                gradient: isDragged
+                    ? LinearGradient(
+                  colors: [Colors.blue, Colors.red],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                )
+                    : LinearGradient(
+                  colors: [Colors.grey, Colors.white],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+              ),
 
-            child: ListTile(
-            title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
-            trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
-            tileColor: my_todoList_c[index].done
-                ? Colors.lightGreenAccent // todoo.done이 true면 파란색
-                : my_todoList_c[index].routine
-                ? Colors.yellowAccent // todoo.routine이 true면 노란색
-                : null,
-          ),
+              child: ListTile(
+                title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
+                trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
+                tileColor: my_todoList_c[index].done
+                    ? Colors.lightGreenAccent // todoo.done이 true면 파란색
+                    : my_todoList_c[index].routine
+                    ? Colors.yellowAccent // todoo.routine이 true면 노란색
+                    : null,
+              ),
+            ),
           );
         },
       )
-      : Center(child : Text("No items in this day")),
+          : Center(child : Text("No items in this day")),
     );
   }
 }
