@@ -5,8 +5,9 @@ class User {
   String name;
   String token; // 인증 토큰 등 추가적인 정보를 저장할 수 있습니다.
   int points;
+  String? image;
 
-  User({required this.id, required this.email, required this.name, required this.token, required this.points});
+  User({required this.id, required this.email, required this.name, required this.token, required this.points, this.image});
 
   // User 클래스의 싱글턴 인스턴스
   static User? _instance;

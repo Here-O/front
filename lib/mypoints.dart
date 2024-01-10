@@ -39,6 +39,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         setState(() {
+          completedTodoList = [];
           completedTodoList = responseJson["completedTodoList"];
           log('completedTodoList updated: ${completedTodoList}');
         });
@@ -49,7 +50,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
             log('Show dialog for user ${user.name}');
             return AlertDialog(
               title: Text('${user.name}의 Todos'),
-              content: _buildCompletedTodoList(), // 완료된 Todo 리스트를 팝업 내부에 표시
+              content: _buildCompletedTodoList(),
+              backgroundColor: Colors.white,
               actions: <Widget>[
                 TextButton(
                   child: Text('Close'),
@@ -93,6 +95,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         var token = User.current.token;
         log("${responseUser["point"]}");
         User.update(responseUser["_id"], responseUser["userEmail"], responseUser["userName"], token, responseUser["point"]);
+        User.current.image = responseUser["userImage"] ?? "defaultImage";
       }
       setState(() {
         // UI 업데이트를 위해 setState 호출
@@ -198,9 +201,9 @@ class _MyPointsPage extends  State<MyPointsPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 사용자의 포인트와 이름을 표시하는 섹션
+
             _buildPointsSection(),
-            // 친구들의 원형 아이콘 리스트
+
             _buildFriendsScrollList(),
             // 필터 버튼
 
@@ -270,6 +273,27 @@ class _MyPointsPage extends  State<MyPointsPage> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
+          GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
+          onTap: () {
+
+          },
+      child:  Column (
+        children: <Widget> [
+              CircleAvatar(
+                  radius: 70.0,
+                   child: ClipOval(
+                     child: Image.network(
+                       User.current.image ?? "defaultImage",
+                       width: 100.0, // 이미지의 너비 조절
+                        height: 100.0, // 이미지의 높이 조절
+                        fit: BoxFit.cover, // 이미지가 영역을 채우도록 조절
+                        ),
+                   ),
+              ),
+            SizedBox(height: 5,),
+    ],
+    ),
+    ),
           Text('$userName 님의 포인트', style: TextStyle(fontSize: 16)),
           Text('$userPoints P', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
         ],
@@ -290,13 +314,13 @@ class _MyPointsPage extends  State<MyPointsPage> {
             child:  Column (
             children: <Widget> [
               CircleAvatar(
-                radius: 50.0, // 반지름을 50.0으로 설정하여 크기를 키웁니다.
+                radius: 50.0,
                 child: ClipOval(
                       child: Image.network(
                         user.image,
-                        width: 100.0, // 이미지의 너비 조절
-                        height: 100.0, // 이미지의 높이 조절
-                        fit: BoxFit.cover, // 이미지가 영역을 채우도록 조절
+                        width: 100.0,
+                        height: 100.0,
+                        fit: BoxFit.cover,
                       ),
                     ),
                 ),
@@ -354,7 +378,8 @@ Widget _buildTodoListStatus(dynamic my_todo) {
         subtitle: Text(todoo.date), // Todo의 date 표시
         trailing: Text('${todoo.point} P+', style: TextStyle(color: Colors.red)),
         tileColor:todoo.done
-            ? Colors.lightBlue // todoo.done이 true면 파란색
+            ? Colors.lightBlue.shade400
+
             : null,
 
       );

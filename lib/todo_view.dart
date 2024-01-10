@@ -34,6 +34,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
   late String formattedSelectedDate;
   late AnimationController controller;
   bool isDragged = false;
+  bool loc_auth_t = false;
 
   // Dummy list of to-dos for today.
   List<todo> my_todoList_c = my_todoList;
@@ -89,6 +90,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
         log('에러 발생 ${e}');
       }
       setState(() {
+
       });
     } else {
       log('edit failed');
@@ -111,7 +113,6 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
 
   Future<void> _refreshData() async {
     await Future.delayed(Duration(seconds: 1)); // 예시로 2초간 대기 (실제 데이터 로딩 로직으로 대체)
-
     setState(() {
       filterTodosBySelectedDate();
     });
@@ -176,6 +177,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
             Navigator.push(context, MaterialPageRoute(builder: (context) => TodoListTab(loc_auth: false,)));
             _onItemTapped(index);
           } else {
+
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
             _onItemTapped(index);
           }

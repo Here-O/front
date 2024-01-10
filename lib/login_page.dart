@@ -32,12 +32,6 @@ class _LoginPage extends State<LoginPage> {
       log('이메일 또는 비밀번호가 입력되지 않았습니다.');
       Fluttertoast.showToast(
           msg: "이메일 또는 비밀번호가 입력되지 않았습니다",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0
       );
       return; // 입력이 비어있으면 함수를 더 이상 진행하지 않고 종료합니다.
     }
@@ -69,12 +63,6 @@ class _LoginPage extends State<LoginPage> {
         log('로그인 실패: ${response.body}');
         Fluttertoast.showToast(
             msg: "이메일 또는 비밀번호가 맞지 않습니다",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.black,
-            textColor: Colors.white,
-            fontSize: 16.0
         );
       }
     } catch (e) {
@@ -89,7 +77,8 @@ class _LoginPage extends State<LoginPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
+        child:Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -159,6 +148,7 @@ class _LoginPage extends State<LoginPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
