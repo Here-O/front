@@ -1,8 +1,14 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hereo/topUser.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 import 'todo.dart';
 import 'user.dart';
@@ -21,9 +27,65 @@ class _MyPointsPage extends  State<MyPointsPage> {
   TodoList todoList = TodoList();
   int _selectedIndex = 2;
   List<TopUser> topUsers = [];
-  List<dynamic> completedTodoList = [];  // 클릭한 사용자의 완료된 todo리스트
+  List<dynamic> completedTodoList = [];
+  List<dynamic> completedTodoList_top = [];
+  final ImagePicker _picker = ImagePicker();
 
-  // 이미지 클릭 이벤트
+  Future<http.MultipartFile> getImageMultipartFile(String imagePath) async {
+    // 파일의 MIME 타입을 가져옵니다.
+    final mimeTypeData = lookupMimeType(imagePath, headerBytes: [0xFF, 0xD8])?.split('/');
+
+    // 이미지 파일을 MultipartFile로 변환합니다.
+    final imageMultipartFile = await http.MultipartFile.fromPath(
+      'image', // 서버에서 인식할 필드명
+      imagePath,
+      contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
+    );
+
+    return imageMultipartFile;
+  }
+
+  Future<void> _pickAndSaveImage() async {
+    // 갤러리에서 이미지를 선택합니다.
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // 임시 디렉터리에 파일을 저장합니다.
+      final imageTemporary = File(pickedFile.path);
+      final directory = await getApplicationDocumentsDirectory();
+      final name = path.basename(imageTemporary.path);
+      final imagePermanent = await imageTemporary.copy('${directory.path}/$name');
+
+      // 파일의 MIME 타입을 가져옵니다.
+      final mimeTypeData = lookupMimeType(imagePermanent.path, headerBytes: [0xFF, 0xD8])?.split('/');
+
+      // MultipartRequest를 생성합니다.
+      var request = http.MultipartRequest("PATCH", Uri.parse('${basicUrl}/mypage/image'))
+        ..headers['Authorization'] = 'Bearer ${User.current.token}'
+        ..files.add(await http.MultipartFile.fromPath(
+          'image', // 서버에서 인식할 필드명
+          imagePermanent.path,
+          contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
+        ));
+
+      try {
+        // 요청을 전송하고 응답을 기다립니다.
+        var response = await request.send();
+        final responseString = await response.stream.bytesToString();
+
+        if (response.statusCode == 200) {
+          log("Image upload success");
+          final responseJson = json.decode(responseString);
+          Fluttertoast.showToast(msg: '${responseJson["message"].toString()}');
+        } else {
+          log("Image upload failed: $responseString");
+        }
+      } catch (e) {
+        log('에러 발생: $e');
+      }
+    }
+  }
+
   void onImageTap(TopUser user, BuildContext context) async {
     try {
       var response = await http.post(
@@ -39,8 +101,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         setState(() {
-          completedTodoList = [];
-          completedTodoList = responseJson["completedTodoList"];
+          completedTodoList_top = [];
+          completedTodoList_top = responseJson["completedTodoList"];
           log('completedTodoList updated: ${completedTodoList}');
         });
 
@@ -50,7 +112,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
             log('Show dialog for user ${user.name}');
             return AlertDialog(
               title: Text('${user.name}의 Todos'),
-              content: _buildCompletedTodoList(),
+              content: _buildCompletedTodoList_top(),
               backgroundColor: Colors.white,
               actions: <Widget>[
                 TextButton(
@@ -158,7 +220,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
         final responseJson = json.decode(response.body);
 
         //log("for 처리 전");
-        for (var todoJson in responseJson["Todo"]) {  // json객체 내에 Todo에 해당하는 데이터처리 반복
+        for (var todoJson in responseJson["Todo"]) {
           //log("todoo 생성 전");
           //log(todoJson.toString());
           var todoo = todo.fromJson(todoJson);
@@ -211,7 +273,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
             SingleChildScrollView(
                 child:Column(
                   children: [
-                    _buildFilterButtons(),
+                    //_buildFilterButtons(),
                     _buildTodoListStatus(my_todo),
                     _buildCompletedTodoList(),
                   ],
@@ -245,7 +307,7 @@ class _MyPointsPage extends  State<MyPointsPage> {
     );
   }
 
-  // 완료된 Todo 리스트 표시 위젯
+
   Widget _buildCompletedTodoList() {
     return ListView.builder(
       scrollDirection: Axis.vertical,
@@ -254,12 +316,38 @@ class _MyPointsPage extends  State<MyPointsPage> {
       itemCount: completedTodoList.length,
       itemBuilder: (BuildContext context, int index) {
         var todoo = completedTodoList[index];
-        return ListTile(
+        return Column(
+        children: <Widget> [
+        ListTile(
           title: Text(todoo["context"]),
           subtitle: Text(todoo["date"]),
           trailing: Text('${todoo["point"]} P+', style: TextStyle(color: Colors.red)),
-          tileColor: todoo["done"] ? Colors.lightBlue : null,
+          tileColor: todoo["done"] ? Colors.blue.shade200 : null,
+        ),
+          Divider(color: Colors.white60, thickness: 2.5, height: 2.5,),
+        ],
         );
+      },
+    );
+  }
+
+  Widget _buildCompletedTodoList_top() {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      itemCount: completedTodoList_top.length,
+      itemBuilder: (BuildContext context, int index) {
+        var todoo = completedTodoList_top[index];
+        return Column(
+          children: <Widget>[
+            ListTile(
+              title: Text(todoo["context"]),
+              subtitle: Text(todoo["date"]),
+              trailing: Text('${todoo["point"]} P+', style: TextStyle(color: Colors.red)),
+              tileColor: todoo["done"] ? Colors.green.shade200 : null,
+            ), Divider(color: Colors.white60, thickness: 1, height: 1,),
+          ],
+        ) ;
       },
     );
   }
@@ -269,13 +357,12 @@ class _MyPointsPage extends  State<MyPointsPage> {
     final userPoints = User.current?.points;
 
     return Padding(
-
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           GestureDetector( // 클릭 이벤트를 위해 GestureDetector 사용
           onTap: () {
-
+            _pickAndSaveImage();
           },
       child:  Column (
         children: <Widget> [
@@ -284,8 +371,8 @@ class _MyPointsPage extends  State<MyPointsPage> {
                    child: ClipOval(
                      child: Image.network(
                        User.current.image ?? "defaultImage",
-                       width: 100.0, // 이미지의 너비 조절
-                        height: 100.0, // 이미지의 높이 조절
+                       width: 150.0, // 이미지의 너비 조절
+                        height: 150.0, // 이미지의 높이 조절
                         fit: BoxFit.cover, // 이미지가 영역을 채우도록 조절
                         ),
                    ),
@@ -327,11 +414,13 @@ class _MyPointsPage extends  State<MyPointsPage> {
               SizedBox(height: 5,),
               Row(
                 children: [
+                  SizedBox(width: 30,),
                   Text('${user.name}',style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
                   SizedBox(width: 2,),
                   Text('${user.points}P', style: TextStyle(fontSize: 12, color: Colors.red.shade600)),
+                  SizedBox(width: 30,),
                 ],
-              )
+              ),
 
               ],
             ),
@@ -373,15 +462,18 @@ Widget _buildTodoListStatus(dynamic my_todo) {
     itemBuilder: (BuildContext context, int index) {
       todo todoo = my_todo[index];
       //log(todoo as String);
-      return ListTile(
-        title: Text(todoo.context), // Todo의 context 표시
-        subtitle: Text(todoo.date), // Todo의 date 표시
-        trailing: Text('${todoo.point} P+', style: TextStyle(color: Colors.red)),
-        tileColor:todoo.done
-            ? Colors.lightBlue.shade400
+      return Column(
+        children: [
+      ListTile(
+      title: Text(todoo.context), // Todo의 context 표시
+      subtitle: Text(todoo.date), // Todo의 date 표시
+      trailing: Text('${todoo.point} P+', style: TextStyle(color: Colors.red)),
+      tileColor:todoo.done
+      ? Colors.lightBlue.shade100
+          : null,
 
-            : null,
-
+      ),  Divider(color: Colors.white60, thickness: 1, height: 1,),
+        ],
       );
     },
   );

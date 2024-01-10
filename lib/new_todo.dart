@@ -95,7 +95,7 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
     } catch(e) {
       log('에러 발생 ${e}');
     }
-    selected_geo = geo(title: 'none', mapx: '0', mapy: '0', roadAddress: '대전광역시 유성구 대학로 291 (한국과학기술원)');
+    selected_geo = geo(title: 'none', mapx: '0', mapy: '0', roadAddress: '위치를 추가해주세요');
   }
 
 
@@ -144,32 +144,12 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
                 });
               },
             ),
-            Text('${selected_geo.title}',style: TextStyle(
+            Text('${selected_geo.roadAddress}',style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '위도: ${selected_geo.lat}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(width: 20), // 위도와 경도 사이의 간격
-                Text(
-                  '경도: ${selected_geo.long}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
+            SizedBox(height: 40),
             ElevatedButton(
               onPressed :() {
                 Navigator.push(
@@ -178,7 +158,7 @@ class _TodoResponsePageState extends State<TodoResponsePage> {
                       map(status: 1,)),
                 );
               },
-              child: Text('투두 위치 추가히기'),
+              child: Text('투두 위치 추가하기'),
               style: ElevatedButton.styleFrom(
                 primary: Colors.blueAccent, // 배경색은 빨간색
                 onPrimary: Colors.white, // 글자색은 흰색

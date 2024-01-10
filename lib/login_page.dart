@@ -84,6 +84,7 @@ class _LoginPage extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              SizedBox(height: 20,),
               // 로고와 타이틀
               Column(
                 children: <Widget>[
@@ -94,10 +95,11 @@ class _LoginPage extends State<LoginPage> {
               // 'Welcome back' 텍스트
               Text(
                 'Welcome back,\nsign in to continue',
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 24.0,
                   color: Colors.black,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(height: 48.0),
@@ -126,6 +128,7 @@ class _LoginPage extends State<LoginPage> {
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyPointsPage()));
                 },
                 child: Text('Forgot password?'),
+
               ),
               SizedBox(height: 24.0),
               // 로그인 버튼

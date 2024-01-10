@@ -142,7 +142,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${selectedDate.day.toString()}일의 투두 리스트'),
+        title: Text('${selectedDate.month.toString()}월 ${selectedDate.day.toString()}일의 투두리스트'),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -154,8 +154,9 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
             //height: 100, // _buildDateScroll에 고정된 높이를 줍니다.
             child: _buildDateScroll(),
           ),
+          SizedBox(height: 8,),
           _buildFirstTodo(),
-          _buildAddTodoButton(),
+          //_buildAddTodoButton(),
           _buildTodoList(),
         ],
       ),
@@ -182,6 +183,14 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
             _onItemTapped(index);
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (context) => TodoResponsePage(selectedDate: selectedDate)));
+        },
+        child: Icon(Icons.add, color: Colors.white,
+
+      ),
+        backgroundColor: Colors.green.shade300,
       ),
     );
   }
@@ -230,8 +239,11 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
       color: Colors.grey[300],
       padding: EdgeInsets.all(16),
       child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(my_todoList_c?.first.context ?? 'No todos yet'),
+        alignment: Alignment.center,
+        child: Text('오늘 하루를 가볍게 시작해보세요!', style: TextStyle(
+          color: Colors.black54, // 색상을 좀 더 연하게 설정합니다.
+          fontWeight: FontWeight.w300, // 글자 두께를 줄여서 텍스트를 연하게 만듭니다.
+        ),),
       ),
     );
     } else {
@@ -292,39 +304,48 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
       child: my_todoList_c.isNotEmpty? ListView.builder(
         itemCount: my_todoList_c?.length ?? 0,
         itemBuilder: (context, index) {
-          return GestureDetector(
-            onHorizontalDragStart: (details) {
-              _selectedTodo = index;
-            },
-            onTap: () {
-              setState(() {
-                _selectedTodo = index;
-                selected_todoId = my_todoList_c[_selectedTodo].id;
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EditTodo(todoId: selected_todoId,)));
-              });
-            },
-            onHorizontalDragEnd:  _handleDragEnd,
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 500),
-              decoration: BoxDecoration(
-                gradient: isDragged & (index == _selectedTodo)
-                    ? LinearGradient(
-                  colors: [Colors.grey, Colors.white],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                )
-                    : LinearGradient(
-                  colors: [my_todoList_c[index].done? Colors.blue.shade100 : Colors.white, my_todoList_c[index].done? Colors.blue.shade200 : Colors.white],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
+          return Column(
+            children: <Widget>[
+          GestureDetector(
+          onHorizontalDragStart: (details) {
+            _selectedTodo = index;
+          },
+          onTap: () {
+          setState(() {
+          _selectedTodo = index;
+          selected_todoId = my_todoList_c[_selectedTodo].id;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EditTodo(todoId: selected_todoId,)));
+          });
+          },
+          onHorizontalDragEnd:  _handleDragEnd,
+          child: AnimatedContainer(
+          duration: Duration(milliseconds: 500),
+          decoration: BoxDecoration(
+          gradient: isDragged & (index == _selectedTodo)
+          ? LinearGradient(
+          colors: [Colors.grey, Colors.white],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          )
+              : LinearGradient(
+          colors: [my_todoList_c[index].done? Colors.blue.shade100 : Colors.white, my_todoList_c[index].done? Colors.blue.shade200 : Colors.white],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          ),
+          ),
 
-              child: ListTile(
-                title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
-                trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
+          child: ListTile(
+          title: Text(my_todoList_c?[index].context ?? 'None todolist context'),
+          trailing: Text('${my_todoList_c?[index].point ?? 0}', style: TextStyle(color: Colors.red)),
+          ),
+          ),
+          ),
+              Divider(
+                color: Colors.grey.shade300, // 색상을 회색으로 설정
+                thickness: 0.8, // 선의 두께를 1로 설정
+                height: 1, // Divider 위젯의 높이를 1로 설정하여 간격을 최소화
               ),
-            ),
+            ],
           );
         },
       )

@@ -129,6 +129,21 @@ class _SignUpPage extends State<SignUpPage> {
                       padding: EdgeInsets.symmetric(vertical: 15.0),
                     ),
                   ),
+                  SizedBox(height: 20,),
+                  ElevatedButton(
+                    child: Text('홈으로 돌아가기'),
+                    onPressed: () {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white60,
+                      onPrimary: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 15.0),
+                    ),
+                  ),
                 ],
               ),
             ),

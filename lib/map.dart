@@ -94,7 +94,7 @@ class _map extends State<map> {
         }
 
         Fluttertoast.showToast(
-            msg: "${total}건 검색 완료",
+            msg: "검색 완료",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
@@ -154,7 +154,7 @@ class _map extends State<map> {
           log(responseJson["addresses"][0]["distance"].toString());
           if (response.statusCode == 200) {
             var dist = responseJson["addresses"][0]["distance"];
-            if (dist <= 500) {
+            if (dist <= 300) {
               if (loc_auth) {
 
               } else {
