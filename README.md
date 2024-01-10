@@ -13,6 +13,7 @@ Flutter와 Node.js, MongoDB를 사용한 사용자 위치 기반 활동 인증 �
 - MongoDB
 
 ## APK 파일
+https://drive.google.com/file/d/1Dbu4iUicaLQWGJ8yc1EqdDd-jljKbYSS/view?usp=sharing
 
 ## 팀원
 
