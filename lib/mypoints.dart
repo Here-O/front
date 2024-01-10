@@ -111,17 +111,24 @@ class _MyPointsPage extends  State<MyPointsPage> {
           builder: (BuildContext dialogContext) {
             log('Show dialog for user ${user.name}');
             return AlertDialog(
-              title: Text('${user.name}의 Todos'),
-              content: _buildCompletedTodoList_top(),
+              title: Text('${user.name}의 투두', ),
+              content: Container(
+                // 컨텐츠의 높이를 제한
+                height: 300.0,
+                width: double.maxFinite,
+                child: _buildCompletedTodoList_top(),
+                color: Colors.white,
+              ),
               backgroundColor: Colors.white,
               actions: <Widget>[
                 TextButton(
                   child: Text('Close'),
                   onPressed: () {
-                    Navigator.of(context).pop(); // 팝업 닫기
+                    Navigator.of(dialogContext).pop(); // 올바른 context를 사용하여 팝업 닫기
                   },
                 ),
               ],
+
             );
           },
         );

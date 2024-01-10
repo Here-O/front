@@ -45,6 +45,33 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
     });
   }
 
+  Future<void> gettodo(User user) async {
+    // todo 조회
+    try {
+      var response = await http.post(
+        Uri.parse('${basicUrl}/points'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${User.current.token}',
+        },
+        body: jsonEncode({'id': user.id}),
+      );
+      log("onImageTap_userId: ${user.id}");
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        setState(() {
+          my_todoList = responseJson["completedTodoList"];
+          my_todoList_c = my_todoList;
+          log('completedTodoList updated: ${my_todoList_c}');
+        });
+      }
+    } catch (e) {
+      // 네트워크 요청 중 예외 발생 처리
+      log('todolist 조회 중 오류 발생: $e');
+    }
+  }
+
   Future<void> filterTodosBySelectedDate() async {
     log('start');
     if (widget.loc_auth) {
@@ -92,10 +119,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
       setState(() {
 
       });
-    } else {
-      log('edit failed');
     }
-
     my_todoList_c = my_todoList;
 
     log(selectedDate.day.toString());
@@ -124,6 +148,7 @@ class _TodoListTabState extends State<TodoListTab> with SingleTickerProviderStat
 
     initializeDateFormatting('ko_KR', null); // 한국어 로케일 초기화
     filterTodosBySelectedDate();
+    gettodo(User.current);
     controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
